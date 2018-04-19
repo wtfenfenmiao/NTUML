@@ -60,4 +60,4 @@ print (np.sum(test_Y!=test_result)/3000)
 #答案是0.473
 
 
-
+xitexit
