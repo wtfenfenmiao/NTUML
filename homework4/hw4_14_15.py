@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 #这个题直接算就行，线性回归
-
+#给很多个Lambda，不划分验证集，去选择Lambda
 def sign(X):
     return 2*(X>0)-1
 

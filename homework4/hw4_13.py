@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 #这个题直接算就行，线性回归
+#最基础的，不选Lambda，直接定死
 
 def sign(X):
     return 2*(X>0)-1

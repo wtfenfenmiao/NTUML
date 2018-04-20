@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 #这个题直接算就行，线性回归
-
+#给很多个Lambda，划分验证集，去选择Lambda
 def sign(X):
     return 2*(X>0)-1
 
@@ -89,6 +89,22 @@ while(mi>=-10):
     mi = mi - 1
 print (Etrain16)
 print (Eval17)
+
+if(Eval17[0]>=0):
+        Lambda=np.power(10,Eval17[0])
+else:
+        Lambda=np.power(0.1,-Eval17[0])
+train_X=train_X.append(validation_X)
+train_Y=train_Y.append(validation_Y)
+print (train_X)
+print (train_Y)
+
+#第18题，0.035 0.02
+w=np.dot(np.dot(np.linalg.inv(np.dot(np.transpose(train_X),train_X)+Lambda*I),np.transpose(train_X)),train_Y)
+Ein = np.sum(sign(np.dot(train_X, w)) != train_Y) / train_Y.size
+Eout = np.sum(sign(np.dot(test_X, w)) != test_Y) / test_Y.size
+print ("Ein:{}".format(Ein))
+print ("Eout:{}".format(Eout))
 
 
 
