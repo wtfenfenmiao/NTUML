@@ -2,6 +2,9 @@
 import pandas as pd
 import numpy as np
 
+
+con = 0
+
 class Node:
     def __init__(self,feature=None,theta=None,s=None,left=None,right=None,value=None):
         self.feature=feature
@@ -29,7 +32,7 @@ def find_feature_theta_s(train_data):
     final_theta=0
     final_s=1
     final_feature=features[0]
-    final_impurity=0
+    final_impurity=train_len
     for feature in features:
         train=train_data.sort_values(by=[feature]).reset_index(drop=True)
         theta_left_new_index=int((train_len-1)/2)
@@ -47,13 +50,22 @@ def find_feature_theta_s(train_data):
         impurity_left=len(train.iloc[0:theta_right_new_index,label])*(1-(left_class_positive_1)*(left_class_positive_1)-(left_class_negtive_1)*(left_class_negtive_1))
         impurity_right=len(train.iloc[theta_right_new_index:, label])*(1-(right_class_positive_1)*(right_class_positive_1)-(right_class_negtive_1)*(right_class_negtive_1))
         impurity=impurity_left+impurity_right
-        if(impurity>final_impurity):
+        if(impurity<final_impurity):
             final_impurity=impurity
             final_theta=theta
             final_s=s
             final_feature=feature
 
     return final_theta,final_s,final_feature
+
+
+def prune_CART_addNode(train_data):    #19-20用的，剪枝的树，只有一层。
+    theta, s, feature = find_feature_theta_s(train_data)
+    root = Node(feature=feature, theta=theta, s=s, value=0)
+    root.left=Node(value=-1)
+    root.right=Node(value=1)
+    return root
+
 
 
 def CART_addNode(train_data,pre_value):   #建树的算法，叶子结点只有value，别的啥都没有。中间的节点，每个都有s theta feature，根据这个划分左右子树。
@@ -83,24 +95,63 @@ def CART_addNode(train_data,pre_value):   #建树的算法，叶子结点只有v
     return root
 
 
-#写一个test的，就是用决策树的函数。test_data进来的时候要有y这一列，没有值没关系
-def predict(test_data,root,label):
+#写一个test的，就是用决策树的函数。test_data进来的时候要有预测值这一列，没有值没关系
+def predict(test_data,root,label_predict):
+    #print ("start:")
+    #print (test_data)
+    if len(test_data)==0:
+        return test_data
     if root.left==None and root.right==None:
-        test_data[label]=root.value
+        test_data[label_predict]=root.value
+        return test_data
     else:
+        #print ("root value:")
+        #print (root.s,root.feature,root.theta)
         val=(root.s)*sign(test_data[root.feature]-root.theta)
-        predict(test_data[val==1],root.right)
-        predict(test_data[val==-1],root.left)
+        #print (val)
+        test_data[val == 1]=predict(test_data[val==1],root.right,label_predict)
+        test_data[val == -1]=predict(test_data[val==-1],root.left,label_predict)
+        return test_data
 
-#遍历树的
-def
+#遍历树的,前序遍历
+def traversal_tree(root):
+    global con
+    con += 1
+    if root.left!=None and root.right!=None:
+        print(root.s,root.theta,root.feature,con)
+        traversal_tree(root.left)
+        traversal_tree(root.right)
+    else:
+        print("leaf",root.value,con)
+
+
 
 
 if __name__=="__main__":
     train_data = pd.read_table("hw7_train.dat", header=None, delim_whitespace=True)
+    test_data = pd.read_table("hw7_test.dat",header=None,delim_whitespace=True)
+
+    print("training the tree:")
     root=CART_addNode(train_data, 0)
 
-    #写一个遍历这个树，输出
+    print("traversal tree:")
+    traversal_tree(root)
+
+    print("predicting:")
+    train_data["predict"]=0
+    test_data["predict"]=0
+
+    #print (train_data)
+    predict(train_data,root,"predict")
+    predict(test_data,root,"predict")
+
+
+    #print (train_data)
+    #print (test_data)
+    Ein=sum(train_data[2]!=train_data["predict"])/len(train_data)
+    Eout=sum(test_data[2]!=test_data["predict"])/len(test_data)
+    print("Ein:",Ein)    #0
+    print("Eout:",Eout)   #0.156
 
 
 
