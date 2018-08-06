@@ -1,17 +1,19 @@
 import pandas as pd
 import numpy as np
 import hw7_13_15
+import gc
 import matplotlib.pyplot as plt
 from hw7_13_15 import sign
 from hw7_13_15 import find_feature_theta_s
 from hw7_13_15 import CART_addNode
 from hw7_13_15 import predict
 
+
 if __name__ =="__main__":
     train_data = pd.read_table("hw7_train.dat", header=None, delim_whitespace=True)
     test_data = pd.read_table("hw7_test.dat", header=None, delim_whitespace=True)
 
-    rootlist=[]
+
     Ein_gt=[]
     Ein_Gt=[]
     Eout_Gt=[]
@@ -19,9 +21,8 @@ if __name__ =="__main__":
     Ein_Gt_predict["predict"]=0
     Eout_Gt_predict=pd.DataFrame(index=range(len(test_data)),columns=['predict'])
     Eout_Gt_predict["predict"]=0
-    for T in range(30000):    #30000个树
+    for T in range(300):    #原来30000个树，跑太久了......
         root=CART_addNode(train_data.sample(len(train_data),replace=True).reset_index(drop=True),0)
-        rootlist.append(root)
 
         train_data["predict"]=0
         test_data["predict"]=0
@@ -47,7 +48,7 @@ if __name__ =="__main__":
         print ("gt:",this_gt)
         print ("Ein_Gt:",this_Ein_Gt)
         print ("Eout_Gt:",this_Eout_Gt)
-
+        gc.collect()
     print("final:")
 
 
